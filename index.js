@@ -8,7 +8,7 @@
 
 const TurtleCoind = require('turtlecoin-rpc').TurtleCoind
 const Client = require('turtlecoin-rpc').Client
-// const TurtleService = require('turtlecoin-rpc').Service
+const TurtleService = require('turtlecoin-rpc').Service
 const info = require('./package.json')
 const readline = require('readline')
 const rl = readline.createInterface({
@@ -154,6 +154,89 @@ function daemonTests () {
   })
 }
 
+function serviceTests () {
+  var ip, port, password, service, address, tempaddress
+
+  console.log('')
+  question('What is the address of turtle-service you would like to test? [127.0.0.1] ').then((serviceIp) => {
+    ip = (serviceIp.length > 0) ? serviceIp : '127.0.0.1'
+    return question('What is the port number of turtle-service you would like to test? [8070] ')
+  }).then((servicePort) => {
+    port = (servicePort.length > 0) ? servicePort : 8070
+    return question('What is the password of turtle-service you would like to test? [password] ')
+  }).then((servicePassword) => {
+    password = (servicePassword.length > 0) ? servicePassword : 'password'
+    service = new TurtleService({
+      host: ip,
+      port: port,
+      rpcPassword: password,
+      defaultMixin: 3
+    })
+
+    console.log('')
+    console.log(`Starting tests against ${ip}:${port}...\n`)
+
+    return checkPass(service.getAddresses())
+  }).then((result) => {
+    if (result.pass && result.info.length > 0) address = result.info[0]
+    console.log(`getAddresses                          passing: ${result.pass}        ${(result.pass && result.info.length > 0) ? result.info[0] : 'unknown'}`)
+    return checkPass(service.getStatus())
+  }).then((result) => {
+    console.log(`getStatus                             passing: ${result.pass}        ${(result.pass && result.info.blockCount) ? result.info.blockCount : 'unknown'}`)
+    return checkPass(service.getFeeInfo())
+  }).then((result) => {
+    console.log(`getFeeInfo                            passing: ${result.pass}        ${(result.pass && result.info.amount) ? result.info.amount : '0.00'}`)
+    return checkPass(service.getViewKey())
+  }).then((result) => {
+    console.log(`getViewKey                            passing: ${result.pass}        ${(result.pass && result.info.viewSecretKey.length > 0) ? 'Hidden' : 'unknown'}`)
+    return checkPass(service.getSpendKeys({address: address}))
+  }).then((result) => {
+    console.log(`getSpendKeys                          passing: ${result.pass}        ${(result.pass && result.info.spendPublicKey.length > 0) ? 'Hidden' : 'unknown'}`)
+    return checkPass(service.getMnemonicSeed({address: address}))
+  }).then((result) => {
+    console.log(`getMnemonicSeed                       passing: ${result.pass}        ${(result.pass && result.info.length > 0) ? 'Hidden' : 'unknown'}`)
+    return checkPass(service.createAddress())
+  }).then((result) => {
+    if (result.pass && result.info.length > 0) tempaddress = result.info
+    console.log(`createAddress                         passing: ${result.pass}        ${(result.pass && result.info.length > 0) ? result.info : 'unknown'}`)
+    return checkPass(service.deleteAddress({address: tempaddress}))
+  }).then((result) => {
+    console.log(`deleteAddress                         passing: ${result.pass}        ${(result.pass) ? 'OK' : 'unknown'}`)
+    return checkPass(service.getBalance())
+  }).then((result) => {
+    console.log(`getBalance                            passing: ${result.pass}        ${(result.pass && result.info.availableBalance !== -1) ? result.info.availableBalance : 'unknown'}`)
+    return checkPass(service.getBlockHashes({firstBlockIndex: 1, blockCount: 10}))
+  }).then((result) => {
+    console.log(`getBlockHashes                        passing: ${result.pass}        ${(result.pass && result.info.blockHashes) ? result.info.blockHashes.length : 'unknown'}`)
+    return checkPass(service.getTransactionHashes({addresses: [address], firstBlockIndex: 1, blockCount: 10}))
+  }).then((result) => {
+    console.log(`getTransactionHashes                  passing: ${result.pass}        ${(result.pass && result.info) ? result.info.length : 'unknown'}`)
+    return checkPass(service.getTransactions({addresses: [address], firstBlockIndex: 1, blockCount: 10}))
+  }).then((result) => {
+    console.log(`getTransactions                       passing: ${result.pass}        ${(result.pass && result.info) ? result.info.length : 'unknown'}`)
+    return checkPass(service.getUnconfirmedTransactionHashes())
+  }).then((result) => {
+    console.log(`getUnconfirmedTransactionHashes       passing: ${result.pass}        ${(result.pass && result.info.transactionHashes) ? result.info.transactionHashes.length : 'unknown'}`)
+    return checkPass(service.createIntegratedAddress({address: 'TRTLv1pacKFJk9QgSmzk2LJWn14JGmTKzReFLz1RgY3K9Ryn7783RDT2TretzfYdck5GMCGzXTuwKfePWQYViNs4avKpnUbrwfQ', paymentId: '80ec855eef7df4bce718442cabe086f19dfdd0d03907c7768eddb8eca8c5a667'}))
+  }).then((result) => {
+    console.log(`createIntegratedAddress               passing: ${result.pass}        ${(result.pass && result.info.length > 0) ? result.info : 'unknown'}`)
+    return checkPass(service.save())
+  }).then((result) => {
+    console.log(`save                                  passing: ${result.pass}        ${(result.pass) ? 'OK' : 'unknown'}`)
+  }).then(() => {
+    console.log(`getTransaction                        passing: skipped`)
+    console.log(`sendTransaction                       passing: skipped`)
+    console.log(`createDelayedTransaction              passing: skipped`)
+    console.log(`deleteDelayedTransaction              passing: skipped`)
+    console.log(`sendDelayedTransaction                passing: skipped`)
+    console.log(`sendFusionTransaction                 passing: skipped`)
+    console.log(`estimateFusion                        passing: skipped`)
+  }).then(() => {
+    console.log('')
+    rl.prompt()
+  })
+}
+
 rl.on('line', (line) => {
   switch (line.trim().toLowerCase()) {
     case 'help':
@@ -165,9 +248,14 @@ rl.on('line', (line) => {
     case 'test daemon':
       daemonTests()
       break
+    case 'test service':
+      serviceTests()
+      break
     case 'exit':
       console.log('\nThanks for using the TurtleCoin Test Suite\n')
       process.exit()
+    case '':
+      break
     default:
       console.log('\nCommand not found. Please type "help" for information on avaiable commands')
       break
