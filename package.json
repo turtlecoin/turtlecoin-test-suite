@@ -1,8 +1,9 @@
 {
   "name": "turtlecoin-test-suite",
-  "version": "0.0.1",
+  "version": "0.0.4",
   "description": "A Node.js test suite for the TurtleCoin project",
   "main": "index.js",
+  "bin": "./index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },

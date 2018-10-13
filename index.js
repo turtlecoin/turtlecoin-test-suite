@@ -1,3 +1,5 @@
+#!/usr/bin/env node
+
 // Copyright (c) 2018, Brandon Lehmann, The TurtleCoin Developers
 //
 // Please see the included LICENSE file for more information.
