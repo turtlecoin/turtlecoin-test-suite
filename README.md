@@ -6,7 +6,7 @@
 
 ## Dependencies
 
-* [NodeJS LTS](https://nodejs.org/) (v6.x, v8.x, v10.x)
+* [Node.js LTS](https://nodejs.org/) (v6.x, v8.x, v10.x)
 * [TurtleCoin](https://github.com/turtlecoin/turtlecoin/releases) v0.8.0 or higher
 
 ## Installation
