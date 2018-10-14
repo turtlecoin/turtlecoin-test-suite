@@ -4,13 +4,18 @@
 
 [![NPM](https://nodei.co/npm/turtlecoin-test-suite.png?downloads=true&stars=true)](https://nodei.co/npm/turtlecoin-test-suite/)
 
-### Installation
+## Dependencies
+
+* [NodeJS LTS](https://nodejs.org/) (v6.x, v8.x, v10.x)
+* [TurtleCoin](https://github.com/turtlecoin/turtlecoin/releases) v0.8.0 or higher
+
+## Installation
 
 ```bash
-npm install -g turtlecoin-test-suite
+sudo npm install -g turtlecoin-test-suite
 ```
 
-### Using
+## Using
 
 ```bash
 turtlecoin-test-suite
