@@ -6,6 +6,8 @@
 
 'use strict'
 
+const seedNode = 'https://api.turtlenode.io/seed.turtlenode.io/getinfo'
+const request = require('request-promise-native')
 const TurtleCoind = require('turtlecoin-rpc').TurtleCoind
 const Client = require('turtlecoin-rpc').Client
 const TurtleService = require('turtlecoin-rpc').Service
@@ -49,8 +51,21 @@ function checkPass (func) {
   })
 }
 
+function getSeedInfo () {
+  return new Promise((resolve, reject) => {
+    request({
+      url: seedNode,
+      json: true
+    }).then((info) => {
+      return resolve({pass: true, info: info})
+    }).catch(() => {
+      return resolve({pass: false, info: {}})
+    })
+  })
+}
+
 function daemonTests () {
-  var ip, port, daemon, client
+  var ip, port, daemon, client, seedInfo
   var lastblockhash = '2ef060801dd27327533580cfa538849f9e1968d13418f2dd2535774a8c494bf4'
 
   console.log('')
@@ -68,10 +83,30 @@ function daemonTests () {
       port: port
     })
     console.log('')
+    console.log(`Attempting to retrieve information from seed node...`)
+    return getSeedInfo()
+  }).then((result) => {
+    console.log('')
+    if (result.pass) {
+      seedInfo = result.info
+      console.log(`Information retrieved from seed node. Height: ${seedInfo.height}, Difficulty: ${seedInfo.difficulty}, Hashrate: ${seedInfo.hashrate}`)
+    } else {
+      console.log(`Could not retrieve information from seed node. Continuing without...`)
+    }
+    console.log('')
     console.log(`Starting tests against ${ip}:${port}...\n`)
     return checkPass(daemon.getInfo())
   }).then((result) => {
     console.log(`getinfo                               passing: ${result.pass}     ${(result.pass && result.info.version) ? result.info.version : 'unknown'}`)
+    if (result.pass && seedInfo.height && result.info.synced && seedInfo.synced) {
+      var matchHeight = (seedInfo.height === result.info.height)
+      var matchDifficulty = (seedInfo.difficulty === result.info.difficulty)
+      console.log(`  - height match                      passing: ${matchHeight}`)
+      console.log(`  - difficulty match                  passing: ${matchDifficulty}`)
+    } else {
+      console.log(`  - height match                      passing: skipped`)
+      console.log(`  - difficulty match                  passing: skipped`)
+    }
     return checkPass(daemon.getHeight())
   }).then((result) => {
     console.log(`getheight                             passing: ${result.pass}     ${(result.pass && result.info.height) ? result.info.height : 'unknown'}`)
