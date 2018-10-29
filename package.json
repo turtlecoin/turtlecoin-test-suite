@@ -1,6 +1,6 @@
 {
   "name": "turtlecoin-test-suite",
-  "version": "0.0.6",
+  "version": "0.0.7",
   "description": "A Node.js test suite for the TurtleCoin project",
   "main": "index.js",
   "bin": "./index.js",
@@ -25,6 +25,6 @@
   "dependencies": {
     "request": "^2.88.0",
     "request-promise-native": "^1.0.5",
-    "turtlecoin-rpc": "^0.8.3"
+    "turtlecoin-rpc": "^0.8.4"
   }
 }
