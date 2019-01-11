@@ -37,7 +37,8 @@ console.log('             Type "help" for information on available commands\n\n'
 
 function question (string) {
   return new Promise((resolve, reject) => {
-    rl.question(string, (answer) => {
+    console.log(string)
+    rl.question('', (answer) => {
       return resolve(answer.trim())
     })
   })
