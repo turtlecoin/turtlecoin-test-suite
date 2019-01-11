@@ -12,7 +12,7 @@ const TurtleCoind = require('turtlecoin-rpc').TurtleCoind
 const Client = require('turtlecoin-rpc').Client
 const TurtleService = require('turtlecoin-rpc').Service
 const info = require('./package.json')
-const author = info.author.toString()
+const author = (typeof info.author === 'object') ? `${info.author.name} <${info.author.email}>` : info.author.toString()
 const license = info.license.toString()
 const readline = require('readline')
 const rl = readline.createInterface({
