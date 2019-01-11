@@ -44,9 +44,10 @@ function question (string) {
 function checkPass (func) {
   return new Promise((resolve, reject) => {
     func.then((result) => {
-      return resolve({pass: true, info: result})
+      if (typeof result === 'undefined') return resolve({ pass: false, info: {} })
+      return resolve({ pass: true, info: result })
     }).catch(() => {
-      return resolve({pass: false, info: {}})
+      return resolve({ pass: false, info: {} })
     })
   })
 }
@@ -57,9 +58,9 @@ function getSeedInfo () {
       url: seedNode,
       json: true
     }).then((info) => {
-      return resolve({pass: true, info: info})
+      return resolve({ pass: true, info: info })
     }).catch(() => {
-      return resolve({pass: false, info: {}})
+      return resolve({ pass: false, info: {} })
     })
   })
 }
@@ -119,20 +120,20 @@ function daemonTests () {
     return checkPass(daemon.getCurrencyId())
   }).then((result) => {
     console.log(`getcurrencyid                         passing: ${result.pass}     ${(result.pass && result.info.length > 0) ? result.info : 'unknown'}`)
-    return checkPass(daemon.getBlockHeaderByHeight({height: 2}))
+    return checkPass(daemon.getBlockHeaderByHeight({ height: 2 }))
   }).then((result) => {
     console.log(`getblockheaderbyheight                passing: ${result.pass}     ${(result.pass && result.info.hash) ? result.info.hash : 'unknown'}`)
-    return checkPass(daemon.getBlockHeaderByHash({hash: '2ef060801dd27327533580cfa538849f9e1968d13418f2dd2535774a8c494bf4'}))
+    return checkPass(daemon.getBlockHeaderByHash({ hash: '2ef060801dd27327533580cfa538849f9e1968d13418f2dd2535774a8c494bf4' }))
   }).then((result) => {
     console.log(`getblockheaderbyhash                  passing: ${result.pass}     ${(result.pass && result.info.height) ? result.info.height : 'unknown'}`)
     return checkPass(daemon.getLastBlockHeader())
   }).then((result) => {
     if (result.pass && result.info.hash) lastblockhash = result.info.hash
     console.log(`getlastblockheader                    passing: ${result.pass}     ${(result.pass && result.info.hash) ? result.info.hash : 'unknown'}`)
-    return checkPass(daemon.getBlockTemplate({walletAddress: 'TRTLuxN6FVALYxeAEKhtWDYNS9Vd9dHVp3QHwjKbo76ggQKgUfVjQp8iPypECCy3MwZVyu89k1fWE2Ji6EKedbrqECHHWouZN6g', reserveSize: 200}))
+    return checkPass(daemon.getBlockTemplate({ walletAddress: 'TRTLuxN6FVALYxeAEKhtWDYNS9Vd9dHVp3QHwjKbo76ggQKgUfVjQp8iPypECCy3MwZVyu89k1fWE2Ji6EKedbrqECHHWouZN6g', reserveSize: 200 }))
   }).then((result) => {
     console.log(`getblocktemplate                      passing: ${result.pass}     ${(result.pass && result.info.difficulty) ? result.info.difficulty : 'unknown'}`)
-    return checkPass(daemon.getBlockHash({height: 2}))
+    return checkPass(daemon.getBlockHash({ height: 2 }))
   }).then((result) => {
     console.log(`on_getblockhash                       passing: ${result.pass}     ${(result.pass && result.info) ? result.info : 'unknown'}`)
     return checkPass(daemon.getBlockCount())
@@ -140,49 +141,58 @@ function daemonTests () {
     console.log(`getblockcount                         passing: ${result.pass}     ${(result.pass && result.info) ? result.info : 'unknown'}`)
     return checkPass(daemon.getTransactionPool())
   }).then((result) => {
+    if (!result.pass) {
+      console.log('')
+      console.log('It looks like you did not start daemon with --enable-blockexplorer')
+      console.log('The next few f_ tests will fail')
+      console.log('')
+    }
     console.log(`f_on_transactions_pool_json           passing: ${result.pass}     ${(result.pass && result.info) ? result.info.length : 'unknown'}`)
-    return checkPass(daemon.getTransaction({hash: '702ad5bd04b9eff14b080d508f69a320da1909e989d6c163c18f80ae7a5ab832'}))
+    return checkPass(daemon.getTransaction({ hash: '702ad5bd04b9eff14b080d508f69a320da1909e989d6c163c18f80ae7a5ab832' }))
   }).then((result) => {
     console.log(`f_transaction_json                    passing: ${result.pass}     ${(result.pass && result.info.txDetails.hash) ? result.info.txDetails.hash : 'unknown'}`)
-    return checkPass(daemon.getBlock({hash: '2ef060801dd27327533580cfa538849f9e1968d13418f2dd2535774a8c494bf4'}))
+    return checkPass(daemon.getBlock({ hash: '2ef060801dd27327533580cfa538849f9e1968d13418f2dd2535774a8c494bf4' }))
   }).then((result) => {
     console.log(`f_block_json                          passing: ${result.pass}     ${(result.pass && result.info.prev_hash) ? result.info.prev_hash : 'unknown'}`)
-    return checkPass(daemon.getBlocks({height: 30}))
+    return checkPass(daemon.getBlocks({ height: 30 }))
   }).then((result) => {
     console.log(`f_blocks_list_json                    passing: ${result.pass}     ${(result.pass && result.info) ? result.info.length : 'unknown'}`)
-    return checkPass(client.queryBlocksLite({blockHashes: ['2ef060801dd27327533580cfa538849f9e1968d13418f2dd2535774a8c494bf4']}))
+    return checkPass(client.queryBlocksLite({ blockHashes: ['2ef060801dd27327533580cfa538849f9e1968d13418f2dd2535774a8c494bf4'] }))
   }).then((result) => {
     console.log(`queryblockslite                       passing: ${result.pass}     ${(result.pass && result.info.items) ? result.info.items.length : 'unknown'}`)
-    return checkPass(client.getIndexes({transactionHash: '702ad5bd04b9eff14b080d508f69a320da1909e989d6c163c18f80ae7a5ab832'}))
+    return checkPass(client.getIndexes({ transactionHash: '702ad5bd04b9eff14b080d508f69a320da1909e989d6c163c18f80ae7a5ab832' }))
   }).then((result) => {
     console.log(`get_o_indexes                         passing: ${result.pass}     ${(result.pass && result.info.o_indexes) ? result.info.o_indexes.length : 'unknown'}`)
-    return checkPass(client.getRandomOutputs({amounts: [100, 1000], mixin: 3}))
+    return checkPass(client.getRandomOutputs({ amounts: [100, 1000], mixin: 3 }))
   }).then((result) => {
     console.log(`getrandom_outs                        passing: ${result.pass}     ${(result.pass && result.info.outs) ? result.info.outs.length : 'unknown'}`)
-    return checkPass(client.getPoolChanges({tailBlockHash: '2ef060801dd27327533580cfa538849f9e1968d13418f2dd2535774a8c494bf4', knownTransactionHashes: []}))
+    return checkPass(client.getPoolChanges({ tailBlockHash: '2ef060801dd27327533580cfa538849f9e1968d13418f2dd2535774a8c494bf4', knownTransactionHashes: [] }))
   }).then((result) => {
     console.log(`get_pool_changes                      passing: ${result.pass}     ${(result.pass && result.info.status) ? result.info.status : 'unknown - okay if failed'}`)
-    return checkPass(client.getPoolChangesLite({tailBlockHash: '2ef060801dd27327533580cfa538849f9e1968d13418f2dd2535774a8c494bf4', knownTransactionHashes: []}))
+    return checkPass(client.getPoolChangesLite({ tailBlockHash: '2ef060801dd27327533580cfa538849f9e1968d13418f2dd2535774a8c494bf4', knownTransactionHashes: [] }))
   }).then((result) => {
     console.log(`get_pool_changes_lite                 passing: ${result.pass}     ${(result.pass && result.info.status) ? result.info.status : 'unknown - okay if failed'}`)
-    return checkPass(client.getBlockDetailsByHeight({blockHeight: 2}))
+    return checkPass(client.getBlockDetailsByHeight({ blockHeight: 2 }))
   }).then((result) => {
     console.log(`get_block_details_by_height           passing: ${result.pass}     ${(result.pass && result.info.block) ? result.info.block.hash : 'unknown'}`)
-    return checkPass(client.getBlocksDetailsByHeights({blockHeights: [2, 4, 6, 8]}))
+    return checkPass(client.getBlocksDetailsByHeights({ blockHeights: [2, 4, 6, 8] }))
   }).then((result) => {
     console.log(`get_blocks_details_by_heights         passing: ${result.pass}     ${(result.pass && result.info.blocks) ? result.info.blocks.length : 'unknown'}`)
-    return checkPass(client.getBlocksDetailsByHashes({blockHashes: ['2ef060801dd27327533580cfa538849f9e1968d13418f2dd2535774a8c494bf4', lastblockhash]}))
+    return checkPass(client.getBlocksDetailsByHashes({ blockHashes: ['2ef060801dd27327533580cfa538849f9e1968d13418f2dd2535774a8c494bf4', lastblockhash] }))
   }).then((result) => {
     console.log(`get_blocks_details_by_hashes          passing: ${result.pass}     ${(result.pass && result.info.blocks) ? result.info.blocks.length : 'unknown'}`)
-    return checkPass(client.getBlocksHashesByTimestamps({timestampBegin: 1531348100, seconds: 240}))
+    return checkPass(client.getBlocksHashesByTimestamps({ timestampBegin: 1531348100, seconds: 240 }))
   }).then((result) => {
     console.log(`get_blocks_hashes_by_timestamps       passing: ${result.pass}     ${(result.pass && result.info.blockHashes) ? result.info.blockHashes.length : 'unknown'}`)
-    return checkPass(client.getTransactionDetailsByHashes({transactionHashes: ['702ad5bd04b9eff14b080d508f69a320da1909e989d6c163c18f80ae7a5ab832']}))
+    return checkPass(client.getTransactionDetailsByHashes({ transactionHashes: ['702ad5bd04b9eff14b080d508f69a320da1909e989d6c163c18f80ae7a5ab832'] }))
   }).then((result) => {
     console.log(`get_transaction_details_by_hashes     passing: ${result.pass}     ${(result.pass && result.info.transactions) ? result.info.transactions.length : 'unknown'}`)
-    return checkPass(client.getTransactionHashesByPaymentId({paymentId: '80ec855eef7df4bce718442cabe086f19dfdd0d03907c7768eddb8eca8c5a667'}))
+    return checkPass(client.getTransactionHashesByPaymentId({ paymentId: '80ec855eef7df4bce718442cabe086f19dfdd0d03907c7768eddb8eca8c5a667' }))
   }).then((result) => {
     console.log(`get_transaction_hashes_by_payment_id  passing: ${result.pass}     ${(result.pass && result.info.transactionHashes) ? result.info.transactionHashes.length : 'unknown'}`)
+    return checkPass(client.queryBlocksDetailed({ blockHashes: ['2ef060801dd27327533580cfa538849f9e1968d13418f2dd2535774a8c494bf4'], blockCount: 2 }))
+  }).then((result) => {
+    console.log(`queryblocksdetailed                   passing: ${result.pass}     ${(result.pass && result.info.blocks) ? result.info.blocks.length : 'unknown'}`)
   }).then(() => {
     console.log('')
     rl.prompt()
@@ -224,35 +234,35 @@ function serviceTests () {
     return checkPass(service.getViewKey())
   }).then((result) => {
     console.log(`getViewKey                            passing: ${result.pass}        ${(result.pass && result.info.viewSecretKey.length > 0) ? 'Hidden' : 'unknown'}`)
-    return checkPass(service.getSpendKeys({address: address}))
+    return checkPass(service.getSpendKeys({ address: address }))
   }).then((result) => {
     console.log(`getSpendKeys                          passing: ${result.pass}        ${(result.pass && result.info.spendPublicKey.length > 0) ? 'Hidden' : 'unknown'}`)
-    return checkPass(service.getMnemonicSeed({address: address}))
+    return checkPass(service.getMnemonicSeed({ address: address }))
   }).then((result) => {
     console.log(`getMnemonicSeed                       passing: ${result.pass}        ${(result.pass && result.info.length > 0) ? 'Hidden' : 'unknown'}`)
     return checkPass(service.createAddress())
   }).then((result) => {
     if (result.pass && result.info.length > 0) tempaddress = result.info
     console.log(`createAddress                         passing: ${result.pass}        ${(result.pass && result.info.length > 0) ? result.info : 'unknown'}`)
-    return checkPass(service.deleteAddress({address: tempaddress}))
+    return checkPass(service.deleteAddress({ address: tempaddress }))
   }).then((result) => {
     console.log(`deleteAddress                         passing: ${result.pass}        ${(result.pass) ? 'OK' : 'unknown'}`)
     return checkPass(service.getBalance())
   }).then((result) => {
     console.log(`getBalance                            passing: ${result.pass}        ${(result.pass && result.info.availableBalance !== -1) ? result.info.availableBalance : 'unknown'}`)
-    return checkPass(service.getBlockHashes({firstBlockIndex: 1, blockCount: 10}))
+    return checkPass(service.getBlockHashes({ firstBlockIndex: 1, blockCount: 10 }))
   }).then((result) => {
     console.log(`getBlockHashes                        passing: ${result.pass}        ${(result.pass && result.info.blockHashes) ? result.info.blockHashes.length : 'unknown'}`)
-    return checkPass(service.getTransactionHashes({addresses: [address], firstBlockIndex: 1, blockCount: 10}))
+    return checkPass(service.getTransactionHashes({ addresses: [address], firstBlockIndex: 1, blockCount: 10 }))
   }).then((result) => {
     console.log(`getTransactionHashes                  passing: ${result.pass}        ${(result.pass && result.info) ? result.info.length : 'unknown'}`)
-    return checkPass(service.getTransactions({addresses: [address], firstBlockIndex: 1, blockCount: 10}))
+    return checkPass(service.getTransactions({ addresses: [address], firstBlockIndex: 1, blockCount: 10 }))
   }).then((result) => {
     console.log(`getTransactions                       passing: ${result.pass}        ${(result.pass && result.info) ? result.info.length : 'unknown'}`)
     return checkPass(service.getUnconfirmedTransactionHashes())
   }).then((result) => {
     console.log(`getUnconfirmedTransactionHashes       passing: ${result.pass}        ${(result.pass && result.info.transactionHashes) ? result.info.transactionHashes.length : 'unknown'}`)
-    return checkPass(service.createIntegratedAddress({address: 'TRTLv1pacKFJk9QgSmzk2LJWn14JGmTKzReFLz1RgY3K9Ryn7783RDT2TretzfYdck5GMCGzXTuwKfePWQYViNs4avKpnUbrwfQ', paymentId: '80ec855eef7df4bce718442cabe086f19dfdd0d03907c7768eddb8eca8c5a667'}))
+    return checkPass(service.createIntegratedAddress({ address: 'TRTLv1pacKFJk9QgSmzk2LJWn14JGmTKzReFLz1RgY3K9Ryn7783RDT2TretzfYdck5GMCGzXTuwKfePWQYViNs4avKpnUbrwfQ', paymentId: '80ec855eef7df4bce718442cabe086f19dfdd0d03907c7768eddb8eca8c5a667' }))
   }).then((result) => {
     console.log(`createIntegratedAddress               passing: ${result.pass}        ${(result.pass && result.info.length > 0) ? result.info : 'unknown'}`)
     return checkPass(service.save())
