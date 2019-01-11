@@ -1,6 +1,6 @@
 {
   "name": "turtlecoin-test-suite",
-  "version": "0.0.9",
+  "version": "0.0.10",
   "description": "A Node.js test suite for the TurtleCoin project",
   "main": "index.js",
   "bin": "./index.js",

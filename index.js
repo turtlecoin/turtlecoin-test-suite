@@ -12,6 +12,8 @@ const TurtleCoind = require('turtlecoin-rpc').TurtleCoind
 const Client = require('turtlecoin-rpc').Client
 const TurtleService = require('turtlecoin-rpc').Service
 const info = require('./package.json')
+const author = info.author.toString()
+const license = info.license.toString()
 const readline = require('readline')
 const rl = readline.createInterface({
   input: process.stdin,
@@ -28,8 +30,8 @@ console.log('\n\n',
   '   ╚═╝    ╚════╝ ╚═╝  ╚═╝   ╚═╝   ╚═════╝╚═════╝ ╚════╝ ╚════╝ ╚═╝╚═╝  ╚═══╝\n')
 
 console.log(`                        TurtleCoin Test Suite v${info.version}\n`)
-console.log(`               By: ${info.author}`)
-console.log(`                   Open Sourced Under ${info.license} since 2018`)
+console.log(`               By: ${author}`)
+console.log(`                   Open Sourced Under ${license} since 2018`)
 console.log('')
 console.log('             Type "help" for information on available commands\n\n')
 
@@ -44,7 +46,7 @@ function question (string) {
 function checkPass (func) {
   return new Promise((resolve, reject) => {
     func.then((result) => {
-      if (typeof result === 'undefined') return resolve({ pass: false, info: {} })
+      result = result || {}
       return resolve({ pass: true, info: result })
     }).catch(() => {
       return resolve({ pass: false, info: {} })
@@ -141,6 +143,7 @@ function daemonTests () {
     console.log(`getblockcount                         passing: ${result.pass}     ${(result.pass && result.info) ? result.info : 'unknown'}`)
     return checkPass(daemon.getTransactionPool())
   }).then((result) => {
+    console.log('')
     if (!result.pass) {
       console.log('')
       console.log('It looks like you did not start daemon with --enable-blockexplorer')
@@ -150,13 +153,24 @@ function daemonTests () {
     console.log(`f_on_transactions_pool_json           passing: ${result.pass}     ${(result.pass && result.info) ? result.info.length : 'unknown'}`)
     return checkPass(daemon.getTransaction({ hash: '702ad5bd04b9eff14b080d508f69a320da1909e989d6c163c18f80ae7a5ab832' }))
   }).then((result) => {
+    if (result.pass && !result.info.txDetails) {
+      result.info = {
+        txDetails: {
+          hash: ''
+        }
+      }
+    }
     console.log(`f_transaction_json                    passing: ${result.pass}     ${(result.pass && result.info.txDetails.hash) ? result.info.txDetails.hash : 'unknown'}`)
     return checkPass(daemon.getBlock({ hash: '2ef060801dd27327533580cfa538849f9e1968d13418f2dd2535774a8c494bf4' }))
   }).then((result) => {
+    if (!result.pass) {
+      result.info = { prev_hash: '' }
+    }
     console.log(`f_block_json                          passing: ${result.pass}     ${(result.pass && result.info.prev_hash) ? result.info.prev_hash : 'unknown'}`)
     return checkPass(daemon.getBlocks({ height: 30 }))
   }).then((result) => {
     console.log(`f_blocks_list_json                    passing: ${result.pass}     ${(result.pass && result.info) ? result.info.length : 'unknown'}`)
+    console.log('')
     return checkPass(client.queryBlocksLite({ blockHashes: ['2ef060801dd27327533580cfa538849f9e1968d13418f2dd2535774a8c494bf4'] }))
   }).then((result) => {
     console.log(`queryblockslite                       passing: ${result.pass}     ${(result.pass && result.info.items) ? result.info.items.length : 'unknown'}`)
@@ -224,7 +238,7 @@ function serviceTests () {
     return checkPass(service.getAddresses())
   }).then((result) => {
     if (result.pass && result.info.length > 0) address = result.info[0]
-    console.log(`getAddresses                          passing: ${result.pass}        ${(result.pass && result.info.length > 0) ? result.info[0] : 'unknown'}`)
+    console.log(`getAddresses                          passing: ${result.pass}        ${(result.pass && result.info.length > 0) ? '[' + result.info.length + '] ' + result.info[0] : 'unknown'}`)
     return checkPass(service.getStatus())
   }).then((result) => {
     console.log(`getStatus                             passing: ${result.pass}        ${(result.pass && result.info.blockCount) ? result.info.blockCount : 'unknown'}`)
