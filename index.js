@@ -314,6 +314,7 @@ rl.on('line', (line) => {
     case 'exit':
       console.log('\nThanks for using the TurtleCoin Test Suite\n')
       process.exit()
+      break
     case '':
       break
     default:
