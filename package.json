@@ -25,9 +25,9 @@
   "dependencies": {
     "request": "^2.88.0",
     "request-promise-native": "^1.0.7",
-    "turtlecoin-rpc": "^1.0.1"
+    "turtlecoin-rpc": "^1.0.2"
   },
   "devDependencies": {
-    "standard": "^13.0.1"
+    "standard": "^13.1.0"
   }
 }
